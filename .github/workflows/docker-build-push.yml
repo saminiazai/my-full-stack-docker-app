@@ -69,11 +69,10 @@ jobs:
 
       - name: Download compose file
         run: |
-          curl -o ~/app/deploy/docker-compose.yml https://raw.githubusercontent.com/innoetech-dev/my-full-stack-docker-app/refs/heads/feature/v2-purple/ci_docker-compose.yml
+          curl -o ~/app/deploy/docker-compose.yml https://raw.githubusercontent.com/saminiazai/my-full-stack-docker-app/main/ci_docker-compose.yml
 
       - name: Replace placeholders
         run: |
-          sed -i "s|DOCKERHUB_USERNAME|${{ secrets.DOCKERHUB_USERNAME }}|g" ~/app/deploy/docker-compose.yml
           sed -i "s|IMAGE_TAG|${{ needs.build-and-push.outputs.sha_short }}|g" ~/app/deploy/docker-compose.yml
 
       - name: Pull latest images
