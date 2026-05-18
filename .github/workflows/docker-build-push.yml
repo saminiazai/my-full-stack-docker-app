@@ -13,6 +13,9 @@ jobs:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
+    outputs:
+      sha_short: ${{ steps.vars.outputs.sha_short }}
+
     steps:
 
       - name: Checkout code
@@ -61,8 +64,20 @@ jobs:
 
     steps:
 
+      - name: Create deploy directory
+        run: mkdir -p ~/app/deploy
+
       - name: Download compose file
         run: |
-          mkdir -p ~/app/deploy
+          curl -o ~/app/deploy/docker-compose.yml https://raw.githubusercontent.com/innoetech-dev/my-full-stack-docker-app/refs/heads/feature/v2-purple/ci_docker-compose.yml
 
-          curl -o ~/app/deploy/docker-compose.yml https://raw.githubusercontent.com/innoetech-dev/my-full-stack-docker-app/refs/heads/feature/load-balancer/ci_docker-compose.yml
+      - name: Replace placeholders
+        run: |
+          sed -i "s|DOCKERHUB_USERNAME|${{ secrets.DOCKERHUB_USERNAME }}|g" ~/app/deploy/docker-compose.yml
+          sed -i "s|IMAGE_TAG|${{ needs.build-and-push.outputs.sha_short }}|g" ~/app/deploy/docker-compose.yml
+
+      - name: Pull latest images
+        run: docker-compose -f ~/app/deploy/docker-compose.yml pull
+
+      - name: Restart containers
+        run: docker-compose -f ~/app/deploy/docker-compose.yml up -d
