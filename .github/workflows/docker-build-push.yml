@@ -8,11 +8,13 @@ on:
       - closed
 
 jobs:
+
   build-and-push:
     if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
 
     steps:
+
       - name: Checkout code
         uses: actions/checkout@v4
 
@@ -52,3 +54,15 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/nginx:latest
             ${{ secrets.DOCKERHUB_USERNAME }}/nginx:${{ steps.vars.outputs.sha_short }}
+
+  deploy:
+    needs: build-and-push
+    runs-on: self-hosted
+
+    steps:
+
+      - name: Download compose file
+        run: |
+          mkdir -p ~/app/deploy
+
+          curl -o ~/app/deploy/docker-compose.yml https://raw.githubusercontent.com/innoetech-dev/my-full-stack-docker-app/refs/heads/feature/load-balancer/ci_docker-compose.yml
