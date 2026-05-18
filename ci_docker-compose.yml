@@ -1,0 +1,20 @@
+services:
+
+  nginx:
+    image: saminiazai/nginx:IMAGE_TAG
+    container_name: nginx-container
+
+    ports:
+      - "80:80"
+
+    depends_on:
+      - frontend
+      - backend
+
+  frontend:
+    image: saminiazai/frontend:IMAGE_TAG
+    container_name: frontend-container
+
+  backend:
+    image: saminiazai/backend:IMAGE_TAG
+    container_name: backend-container
